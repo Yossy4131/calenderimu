@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
-import 'screens/calendar_screen.dart';
+import 'screens/home_screen.dart';
 
 /// アプリケーションのエントリーポイント
 Future<void> main() async {
@@ -56,7 +56,7 @@ class CalendarApp extends StatelessWidget {
         dividerColor: const Color(0xFFE1E8ED), // Twitter border color
         useMaterial3: true,
       ),
-      home: const CalendarScreen(),
+      home: const HomeScreen(),
     );
   }
 }
