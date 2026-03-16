@@ -90,34 +90,54 @@ class CalendarGrid extends StatelessWidget {
     return InkWell(
       onTap: () => onDayTapped(day.date),
       borderRadius: BorderRadius.circular(8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: _getCellBackgroundColor(day, theme),
-          borderRadius: BorderRadius.circular(20.0), // より丸みを帯びたデザイン
-          border: day.isToday && !day.isSelected
-              ? Border.all(color: const Color(0xFF1DA1F2), width: 2.0)
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 日付
-            Text(
-              '${day.date.day}',
-              style: TextStyle(
-                color: day.isSelected ? Colors.white : textColor,
-                fontWeight: day.isToday || day.isSelected
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-              ),
+      child: Stack(
+        children: [
+          // メインコンテナ
+          Container(
+            decoration: BoxDecoration(
+              color: _getCellBackgroundColor(day, theme),
+              borderRadius: BorderRadius.circular(20.0), // より丸みを帯びたデザイン
+              border: day.isToday && !day.isSelected
+                  ? Border.all(color: const Color(0xFF1DA1F2), width: 2.0)
+                  : null,
             ),
-            // 耳鳴りデータのインジケーター
-            if (day.tinnitusData?.hasAnyData ?? false)
-              const SizedBox(height: 2),
-            if (day.tinnitusData?.hasAnyData ?? false)
-              _buildTinnitusIndicator(day),
-          ],
-        ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 日付
+                Text(
+                  '${day.date.day}',
+                  style: TextStyle(
+                    color: day.isSelected ? Colors.white : textColor,
+                    fontWeight: day.isToday || day.isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+                // 生理期間のインジケーター（開始日のみ表示）
+                if (day.periodStatus == PeriodStatus.start ||
+                    day.periodStatus == PeriodStatus.startConfirmed)
+                  const SizedBox(height: 2),
+                if (day.periodStatus == PeriodStatus.start ||
+                    day.periodStatus == PeriodStatus.startConfirmed)
+                  Icon(
+                    Icons.water_drop,
+                    size: 12,
+                    color: day.isSelected ? Colors.white : Colors.pink.shade400,
+                  ),
+                // 耳鳴りデータのインジケーター
+                if (day.tinnitusData?.hasAnyData ?? false)
+                  const SizedBox(height: 2),
+                if (day.tinnitusData?.hasAnyData ?? false)
+                  _buildTinnitusIndicator(day),
+              ],
+            ),
+          ),
+          // 生理期間の横棒
+          if (day.periodStatus != null &&
+              day.periodStatus != PeriodStatus.start)
+            _buildPeriodBar(day),
+        ],
       ),
     );
   }
@@ -161,6 +181,51 @@ class CalendarGrid extends StatelessWidget {
     } else {
       return Colors.red;
     }
+  }
+
+  /// 生理期間の横棒を構築
+  Widget _buildPeriodBar(CalendarDay day) {
+    // 期間中と終了日で横棒の形状を変える
+    BorderRadius borderRadius;
+    EdgeInsets margin;
+
+    if (day.periodStatus == PeriodStatus.startConfirmed) {
+      // 開始日（期間確定）：左側のみ丸める
+      borderRadius = const BorderRadius.only(
+        topLeft: Radius.circular(2),
+        bottomLeft: Radius.circular(2),
+      );
+      margin = EdgeInsets.zero;
+    } else if (day.periodStatus == PeriodStatus.during) {
+      // 期間中：左右いっぱいに横棒を表示（連続して見える）
+      borderRadius = BorderRadius.zero;
+      margin = EdgeInsets.zero;
+    } else if (day.periodStatus == PeriodStatus.end) {
+      // 終了日：右側のみ丸める
+      borderRadius = const BorderRadius.only(
+        topRight: Radius.circular(2),
+        bottomRight: Radius.circular(2),
+      );
+      margin = EdgeInsets.zero;
+    } else {
+      // デフォルト
+      borderRadius = BorderRadius.circular(2);
+      margin = const EdgeInsets.symmetric(horizontal: 4);
+    }
+
+    return Positioned(
+      bottom: 4,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: 4,
+        margin: margin,
+        decoration: BoxDecoration(
+          color: Colors.pink.shade400,
+          borderRadius: borderRadius,
+        ),
+      ),
+    );
   }
 
   /// セルの背景色を取得

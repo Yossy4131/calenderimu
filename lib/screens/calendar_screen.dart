@@ -3,7 +3,9 @@ import '../utils/calendar_utils.dart';
 import '../widgets/calendar_header.dart';
 import '../widgets/calendar_grid.dart';
 import '../services/tinnitus_service.dart';
+import '../services/period_service.dart';
 import '../models/tinnitus_data.dart';
+import '../models/period_data.dart';
 import 'date_detail_screen.dart';
 
 /// カレンダー画面
@@ -19,7 +21,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
   late int _currentMonth;
   DateTime? _selectedDate;
   final TinnitusService _tinnitusService = TinnitusService();
+  final PeriodService _periodService = PeriodService();
   Map<String, TinnitusData> _tinnitusDataMap = {};
+  List<PeriodData> _periodDataList = [];
   bool _isLoading = false;
 
   @override
@@ -37,13 +41,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _isLoading = true;
     });
 
-    final data = await _tinnitusService.getTinnitusDataForMonth(
-      _currentYear,
-      _currentMonth,
-    );
+    // 耳鳴りデータと生理期間データを並列で読み込み
+    final results = await Future.wait([
+      _tinnitusService.getTinnitusDataForMonth(_currentYear, _currentMonth),
+      _periodService.getPeriodDataForMonth(_currentYear, _currentMonth),
+    ]);
 
     setState(() {
-      _tinnitusDataMap = data;
+      _tinnitusDataMap = results[0] as Map<String, TinnitusData>;
+      _periodDataList = results[1] as List<PeriodData>;
       _isLoading = false;
     });
   }
@@ -106,6 +112,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       month: _currentMonth,
       selectedDate: _selectedDate,
       tinnitusDataMap: _tinnitusDataMap,
+      periodDataList: _periodDataList,
     );
 
     return Scaffold(

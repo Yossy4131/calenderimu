@@ -1,5 +1,6 @@
 import '../models/calendar_day.dart';
 import '../models/tinnitus_data.dart';
+import '../models/period_data.dart';
 
 /// カレンダー関連のユーティリティ関数を提供するクラス
 class CalendarUtils {
@@ -9,6 +10,7 @@ class CalendarUtils {
   /// [month] 月（1-12）
   /// [selectedDate] 選択されている日付（オプション）
   /// [tinnitusDataMap] 耳鳴りデータのマップ（オプション）
+  /// [periodDataList] 生理期間データのリスト（オプション）
   ///
   /// 返り値: カレンダーに表示する日付のリスト（前月末・当月・次月初を含む）
   static List<CalendarDay> generateCalendarDays({
@@ -16,6 +18,7 @@ class CalendarUtils {
     required int month,
     DateTime? selectedDate,
     Map<String, TinnitusData>? tinnitusDataMap,
+    List<PeriodData>? periodDataList,
   }) {
     final List<CalendarDay> days = [];
     final firstDayOfMonth = DateTime(year, month, 1);
@@ -37,6 +40,7 @@ class CalendarUtils {
           isToday: _isSameDay(date, today),
           isSelected: selectedDate != null && _isSameDay(date, selectedDate),
           tinnitusData: tinnitusDataMap?[dateKey],
+          periodStatus: _getPeriodStatus(dateKey, periodDataList),
         ),
       );
     }
@@ -52,6 +56,7 @@ class CalendarUtils {
           isToday: _isSameDay(date, today),
           isSelected: selectedDate != null && _isSameDay(date, selectedDate),
           tinnitusData: tinnitusDataMap?[dateKey],
+          periodStatus: _getPeriodStatus(dateKey, periodDataList),
         ),
       );
     }
@@ -68,6 +73,7 @@ class CalendarUtils {
           isToday: _isSameDay(date, today),
           isSelected: selectedDate != null && _isSameDay(date, selectedDate),
           tinnitusData: tinnitusDataMap?[dateKey],
+          periodStatus: _getPeriodStatus(dateKey, periodDataList),
         ),
       );
     }
@@ -80,6 +86,45 @@ class CalendarUtils {
     return date1.year == date2.year &&
         date1.month == date2.month &&
         date1.day == date2.day;
+  }
+
+  /// 指定された日付の生理期間状態を取得
+  static PeriodStatus? _getPeriodStatus(
+    String dateKey,
+    List<PeriodData>? periodDataList,
+  ) {
+    if (periodDataList == null || periodDataList.isEmpty) {
+      return null;
+    }
+
+    // dateKeyを含む期間を探す
+    for (final periodData in periodDataList) {
+      // 開始日の場合
+      if (periodData.startDate == dateKey) {
+        // endDateがnullの場合（進行中）のみ開始日マークを表示
+        if (periodData.endDate == null) {
+          return PeriodStatus.start;
+        }
+        // 開始日と終了日が同じ場合は開始日扱い
+        if (periodData.endDate == dateKey) {
+          return PeriodStatus.start;
+        }
+        // 期間がある場合は開始日確定として扱う（水滴アイコン + 横棒）
+        return PeriodStatus.startConfirmed;
+      }
+
+      // 終了日の場合
+      if (periodData.endDate == dateKey) {
+        return PeriodStatus.end;
+      }
+
+      // 期間中の場合（endDateが確定している場合のみ背景色表示）
+      if (periodData.endDate != null && periodData.containsDate(dateKey)) {
+        return PeriodStatus.during;
+      }
+    }
+
+    return null;
   }
 
   /// 月名を取得（日本語）
