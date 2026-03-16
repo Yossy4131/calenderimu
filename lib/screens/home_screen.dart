@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'calendar_screen.dart';
 import 'tinnitus_chart_screen.dart';
+import '../services/auth_service.dart';
 
 /// ホーム画面（ボトムナビゲーションバー付き）
 class HomeScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  final AuthService _authService = AuthService();
 
   // 画面リスト
   final List<Widget> _screens = [
@@ -19,9 +21,53 @@ class _HomeScreenState extends State<HomeScreen> {
     const TinnitusChartScreen(),
   ];
 
+  /// サインアウト処理
+  Future<void> _handleSignOut() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('サインアウト'),
+        content: const Text('サインアウトしますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('サインアウト'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        await _authService.signOut();
+        // AuthWrapperがStreamBuilderで自動的にログイン画面に遷移
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('サインアウトエラー: $e')));
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(_currentIndex == 0 ? 'カレンダー' : '耳鳴りグラフ'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'サインアウト',
+            onPressed: _handleSignOut,
+          ),
+        ],
+      ),
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

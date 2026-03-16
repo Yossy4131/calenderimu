@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/period_data.dart';
+import 'auth_service.dart';
 
 /// 生理期間データのFirestore操作を管理するサービスクラス
 /// 生理期間は開始日をドキュメントIDとして管理する
 class PeriodService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
   static const String _collectionName = 'period_records';
 
-  /// ユーザーIDを取得（今は固定値、将来的にはFirebase Authと連携）
-  String get _userId => 'default_user';
+  /// ユーザーIDを取得
+  String get _userId => _authService.currentUserId;
 
   /// コレクションの参照を取得
   CollectionReference get _collection {

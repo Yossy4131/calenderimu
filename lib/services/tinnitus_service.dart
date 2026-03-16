@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/tinnitus_data.dart';
+import 'auth_service.dart';
 
 /// 耳鳴りデータのFirestore操作を管理するサービスクラス
 class TinnitusService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
   static const String _collectionName = 'tinnitus_records';
 
-  /// ユーザーIDを取得（今は固定値、将来的にはFirebase Authと連携）
-  String get _userId => 'default_user';
+  /// ユーザーIDを取得
+  String get _userId => _authService.currentUserId;
 
   /// コレクションの参照を取得
   CollectionReference get _collection {
