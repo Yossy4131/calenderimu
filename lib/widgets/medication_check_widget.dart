@@ -118,17 +118,15 @@ class MedicationCheckWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isTaken ? const Color(0xFF1DA1F2) : Colors.transparent,
                 border: Border.all(
-                  color: isTaken ? const Color(0xFF1DA1F2) : Colors.grey.shade400,
+                  color: isTaken
+                      ? const Color(0xFF1DA1F2)
+                      : Colors.grey.shade400,
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: isTaken
-                  ? const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 20,
-                    )
+                  ? const Icon(Icons.check, color: Colors.white, size: 20)
                   : null,
             ),
             const SizedBox(width: 12),

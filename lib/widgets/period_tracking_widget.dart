@@ -36,10 +36,7 @@ class PeriodTrackingWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 const Text(
                   '生理記録',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 // 状態バッジ
@@ -108,13 +105,8 @@ class PeriodTrackingWidget extends StatelessWidget {
             // 説明テキスト
             const SizedBox(height: 12),
             Text(
-              currentlyInPeriod
-                  ? 'この日を最終日として生理を終了します'
-                  : 'この日から生理を開始します',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              currentlyInPeriod ? 'この日を最終日として生理を終了します' : 'この日から生理を開始します',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               textAlign: TextAlign.center,
             ),
           ],

@@ -47,8 +47,9 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
     });
 
     final tinnitusData = await _tinnitusService.getTinnitusData(widget.date);
-    final medicationData =
-        await _medicationService.getMedicationData(widget.date);
+    final medicationData = await _medicationService.getMedicationData(
+      widget.date,
+    );
     // 最新の生理期間が進行中かどうかを取得
     final ongoingPeriod = await _periodService.getOngoingPeriod();
 
@@ -62,7 +63,7 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
       _editingEveningTaken = medicationData?.eveningTaken ?? false;
       // 進行中の期間があるかどうか（最新ドキュメントのendDateがnull）
       _editingIsPeriod = ongoingPeriod != null;
-      
+
       _isLoading = false;
       _hasUnsavedChanges = false;
     });
@@ -205,10 +206,12 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
         String errorMessage = 'エラーが発生しました';
 
         if (e.toString().contains('Unable to establish connection')) {
-          errorMessage = 'Firestoreへの接続に失敗しました。\n'
+          errorMessage =
+              'Firestoreへの接続に失敗しました。\n'
               'Firebaseコンソールでfirestoreが有効化されているか確認してください。';
         } else if (e.toString().contains('permission-denied')) {
-          errorMessage = 'アクセス権限がありません。\n'
+          errorMessage =
+              'アクセス権限がありません。\n'
               'Firestoreのセキュリティルールを確認してください。';
         }
 
@@ -295,95 +298,97 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
             ],
           ),
         ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 服薬記録ウィジェット
-                  MedicationCheckWidget(
-                    medicationData: MedicationData(
-                      dateKey: MedicationData.dateKeyFromDateTime(widget.date),
-                      morningTaken: _editingMorningTaken,
-                      afternoonTaken: _editingAfternoonTaken,
-                      eveningTaken: _editingEveningTaken,
-                    ),
-                    onTakenChanged: _updateTaken,
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // 耳鳴り評価ウィジェット
-                  TinnitusRatingWidget(
-                    tinnitusData: TinnitusData(
-                      dateKey: TinnitusData.dateKeyFromDateTime(widget.date),
-                      morningLevel: _editingMorningLevel,
-                      afternoonLevel: _editingAfternoonLevel,
-                      eveningLevel: _editingEveningLevel,
-                    ),
-                    onLevelChanged: _updateLevel,
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // 生理記録ウィジェット
-                  PeriodTrackingWidget(
-                    isPeriod: _editingIsPeriod,
-                    onStartPeriod: _startPeriod,
-                    onEndPeriod: _endPeriod,
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // 保存ボタン
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: _saveAllData,
-                      icon: const Icon(Icons.check),
-                      label: const Text(
-                        '保存して戻る',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 服薬記録ウィジェット
+                    MedicationCheckWidget(
+                      medicationData: MedicationData(
+                        dateKey: MedicationData.dateKeyFromDateTime(
+                          widget.date,
                         ),
+                        morningTaken: _editingMorningTaken,
+                        afternoonTaken: _editingAfternoonTaken,
+                        eveningTaken: _editingEveningTaken,
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1DA1F2),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      onTakenChanged: _updateTaken,
                     ),
-                  ),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 32),
 
-                  // クリアボタン
-                  if ((_editingMorningLevel != null ||
-                          _editingAfternoonLevel != null ||
-                          _editingEveningLevel != null) ||
-                      (_editingMorningTaken ||
-                          _editingAfternoonTaken ||
-                          _editingEveningTaken) ||
-                      _editingIsPeriod)
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: _showClearConfirmation,
-                        icon: const Icon(Icons.clear_all),
-                        label: const Text('すべてクリア'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.red,
+                    // 耳鳴り評価ウィジェット
+                    TinnitusRatingWidget(
+                      tinnitusData: TinnitusData(
+                        dateKey: TinnitusData.dateKeyFromDateTime(widget.date),
+                        morningLevel: _editingMorningLevel,
+                        afternoonLevel: _editingAfternoonLevel,
+                        eveningLevel: _editingEveningLevel,
+                      ),
+                      onLevelChanged: _updateLevel,
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // 生理記録ウィジェット
+                    PeriodTrackingWidget(
+                      isPeriod: _editingIsPeriod,
+                      onStartPeriod: _startPeriod,
+                      onEndPeriod: _endPeriod,
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // 保存ボタン
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: _saveAllData,
+                        icon: const Icon(Icons.check),
+                        label: const Text(
+                          '保存して戻る',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1DA1F2),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                ],
+
+                    const SizedBox(height: 16),
+
+                    // クリアボタン
+                    if ((_editingMorningLevel != null ||
+                            _editingAfternoonLevel != null ||
+                            _editingEveningLevel != null) ||
+                        (_editingMorningTaken ||
+                            _editingAfternoonTaken ||
+                            _editingEveningTaken) ||
+                        _editingIsPeriod)
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: _showClearConfirmation,
+                          icon: const Icon(Icons.clear_all),
+                          label: const Text('すべてクリア'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.red,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
       ),
     );
   }
@@ -396,7 +401,8 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
         return AlertDialog(
           title: const Text('確認'),
           content: const Text(
-              'この日のすべての記録を削除しますか？\n（耳鳴り記録と服薬記録が削除されます）\n\n※ 生理記録は期間として管理されているため削除されません'),
+            'この日のすべての記録を削除しますか？\n（耳鳴り記録と服薬記録が削除されます）\n\n※ 生理記録は期間として管理されているため削除されません',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),

@@ -22,7 +22,7 @@ class PeriodService {
   Future<PeriodData?> getPeriodContainingDate(DateTime date) async {
     try {
       final dateKey = PeriodData.dateKeyFromDateTime(date);
-      
+
       // 全件取得してクライアント側でフィルタリング（インデックス不要）
       final querySnapshot = await _collection.get();
 
@@ -55,7 +55,7 @@ class PeriodService {
         final periodData = PeriodData.fromFirestore(doc);
         if (periodData.isOngoing) {
           // 複数ある場合は最新のものを選択（開始日が最も遅いもの）
-          if (latestStartDate == null || 
+          if (latestStartDate == null ||
               periodData.startDate.compareTo(latestStartDate) > 0) {
             ongoingPeriod = periodData;
             latestStartDate = periodData.startDate;
@@ -74,7 +74,7 @@ class PeriodService {
   Future<void> startPeriod(DateTime date) async {
     try {
       final dateKey = PeriodData.dateKeyFromDateTime(date);
-      
+
       // 既に進行中の期間があれば、前日で終了させる
       final ongoingPeriod = await getOngoingPeriod();
       if (ongoingPeriod != null) {
@@ -103,10 +103,10 @@ class PeriodService {
   Future<void> endPeriod(DateTime date) async {
     try {
       final dateKey = PeriodData.dateKeyFromDateTime(date);
-      
+
       // 進行中の期間を取得
       final ongoingPeriod = await getOngoingPeriod();
-      
+
       if (ongoingPeriod == null) {
         throw Exception('終了する生理期間が見つかりません');
       }
@@ -123,10 +123,7 @@ class PeriodService {
   }
 
   /// 指定月の生理期間データを一括取得
-  Future<List<PeriodData>> getPeriodDataForMonth(
-    int year,
-    int month,
-  ) async {
+  Future<List<PeriodData>> getPeriodDataForMonth(int year, int month) async {
     try {
       // 全件取得してクライアント側でフィルタリング（インデックス不要）
       final querySnapshot = await _collection.get();
@@ -141,13 +138,13 @@ class PeriodService {
       final List<PeriodData> periodsInMonth = [];
       for (final doc in querySnapshot.docs) {
         final periodData = PeriodData.fromFirestore(doc);
-        
+
         // 開始日が月の範囲内、または期間が月の範囲と重なる場合
         final startDate = periodData.startDate;
         final endDate = periodData.endDate ?? lastKey; // 進行中の場合は月末まで
-        
+
         // 期間が指定月と重なるかチェック
-        if ((startDate.compareTo(lastKey) <= 0) && 
+        if ((startDate.compareTo(lastKey) <= 0) &&
             (endDate.compareTo(firstKey) >= 0)) {
           periodsInMonth.add(periodData);
         }

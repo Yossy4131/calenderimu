@@ -13,11 +13,7 @@ class PeriodData {
   /// 最終更新日時
   final DateTime? lastUpdated;
 
-  const PeriodData({
-    required this.startDate,
-    this.endDate,
-    this.lastUpdated,
-  });
+  const PeriodData({required this.startDate, this.endDate, this.lastUpdated});
 
   /// 期間が進行中かどうか
   bool get isOngoing => endDate == null;
@@ -38,9 +34,7 @@ class PeriodData {
     final data = doc.data() as Map<String, dynamic>?;
 
     if (data == null) {
-      return PeriodData(
-        startDate: doc.id,
-      );
+      return PeriodData(startDate: doc.id);
     }
 
     return PeriodData(

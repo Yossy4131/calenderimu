@@ -30,9 +30,7 @@ class MedicationData {
     final data = doc.data() as Map<String, dynamic>?;
 
     if (data == null) {
-      return MedicationData(
-        dateKey: doc.id,
-      );
+      return MedicationData(dateKey: doc.id);
     }
 
     return MedicationData(

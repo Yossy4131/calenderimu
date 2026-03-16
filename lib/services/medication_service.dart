@@ -48,10 +48,9 @@ class MedicationService {
   /// 服用データを保存または更新
   Future<void> saveMedicationData(MedicationData data) async {
     try {
-      await _collection.doc(data.dateKey).set(
-            data.toFirestore(),
-            SetOptions(merge: true),
-          );
+      await _collection
+          .doc(data.dateKey)
+          .set(data.toFirestore(), SetOptions(merge: true));
     } catch (e) {
       print('Error saving medication data: $e');
       rethrow;
@@ -62,13 +61,10 @@ class MedicationService {
   Future<void> updateMorningTaken(DateTime date, bool taken) async {
     try {
       final dateKey = MedicationData.dateKeyFromDateTime(date);
-      await _collection.doc(dateKey).set(
-        {
-          'morningTaken': taken,
-          'lastUpdated': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+      await _collection.doc(dateKey).set({
+        'morningTaken': taken,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     } catch (e) {
       print('Error updating morning medication: $e');
       rethrow;
@@ -79,13 +75,10 @@ class MedicationService {
   Future<void> updateAfternoonTaken(DateTime date, bool taken) async {
     try {
       final dateKey = MedicationData.dateKeyFromDateTime(date);
-      await _collection.doc(dateKey).set(
-        {
-          'afternoonTaken': taken,
-          'lastUpdated': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+      await _collection.doc(dateKey).set({
+        'afternoonTaken': taken,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     } catch (e) {
       print('Error updating afternoon medication: $e');
       rethrow;
@@ -96,13 +89,10 @@ class MedicationService {
   Future<void> updateEveningTaken(DateTime date, bool taken) async {
     try {
       final dateKey = MedicationData.dateKeyFromDateTime(date);
-      await _collection.doc(dateKey).set(
-        {
-          'eveningTaken': taken,
-          'lastUpdated': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+      await _collection.doc(dateKey).set({
+        'eveningTaken': taken,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     } catch (e) {
       print('Error updating evening medication: $e');
       rethrow;
