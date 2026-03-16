@@ -305,6 +305,8 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 24),
+
                     // 服薬記録ウィジェット
                     MedicationCheckWidget(
                       medicationData: MedicationData(
@@ -318,7 +320,7 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
                       onTakenChanged: _updateTaken,
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     // 耳鳴り評価ウィジェット
                     TinnitusRatingWidget(
@@ -331,7 +333,7 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
                       onLevelChanged: _updateLevel,
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     // 生理記録ウィジェット
                     PeriodTrackingWidget(
@@ -345,14 +347,14 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
                     // 保存ボタン
                     SizedBox(
                       width: double.infinity,
-                      height: 50,
+                      height: 56,
                       child: ElevatedButton.icon(
                         onPressed: _saveAllData,
-                        icon: const Icon(Icons.check),
+                        icon: const Icon(Icons.check, size: 24),
                         label: const Text(
                           '保存して戻る',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -360,8 +362,10 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
                           backgroundColor: const Color(0xFF1DA1F2),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                           ),
+                          elevation: 3,
+                          shadowColor: const Color(0xFF1DA1F2).withOpacity(0.4),
                         ),
                       ),
                     ),

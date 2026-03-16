@@ -38,13 +38,20 @@ class GaugeBarWidget extends StatelessWidget {
   /// ゲージバーを構築
   Widget _buildGaugeBar() {
     return Container(
-      height: 50,
+      height: 56,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.grey.shade300, width: 2),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.grey.shade300, width: 2.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(23),
+        borderRadius: BorderRadius.circular(25.5),
         child: Row(
           children: List.generate(10, (index) {
             final level = index + 1;
@@ -56,10 +63,10 @@ class GaugeBarWidget extends StatelessWidget {
                 onTap: () => onLevelChanged(level),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? color : color.withOpacity(0.15),
+                    color: isSelected ? color : color.withOpacity(0.12),
                     border: Border(
                       right: index < 9
-                          ? const BorderSide(color: Colors.white, width: 1)
+                          ? const BorderSide(color: Colors.white, width: 1.5)
                           : BorderSide.none,
                     ),
                   ),
@@ -67,13 +74,13 @@ class GaugeBarWidget extends StatelessWidget {
                     child: Text(
                       '$level',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: isSelected
                             ? FontWeight.bold
-                            : FontWeight.normal,
+                            : FontWeight.w500,
                         color: isSelected
                             ? Colors.white
-                            : color.withOpacity(0.7),
+                            : color.withOpacity(0.6),
                       ),
                     ),
                   ),

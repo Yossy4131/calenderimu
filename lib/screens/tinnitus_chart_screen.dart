@@ -94,14 +94,35 @@ class _TinnitusChartScreenState extends State<TinnitusChartScreen> {
   /// ヘッダーを構築
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
         children: [
-          Icon(Icons.show_chart, size: 28, color: const Color(0xFF1DA1F2)),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1DA1F2).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.show_chart,
+              size: 28,
+              color: Color(0xFF1DA1F2),
+            ),
+          ),
           const SizedBox(width: 12),
           const Text(
             '耳鳴りレベルの推移',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -111,13 +132,15 @@ class _TinnitusChartScreenState extends State<TinnitusChartScreen> {
   /// 期間選択ボタンを構築
   Widget _buildPeriodSelector() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.all(20.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildPeriodButton('7日', 7),
+          const SizedBox(width: 8),
           _buildPeriodButton('14日', 14),
+          const SizedBox(width: 8),
           _buildPeriodButton('30日', 30),
+          const SizedBox(width: 8),
           _buildPeriodButton('90日', 90),
         ],
       ),
@@ -128,19 +151,41 @@ class _TinnitusChartScreenState extends State<TinnitusChartScreen> {
   Widget _buildPeriodButton(String label, int days) {
     final isSelected = _selectedPeriod == days;
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: ElevatedButton(
-          onPressed: () => _changePeriod(days),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected
-                ? const Color(0xFF1DA1F2)
-                : Colors.grey.shade200,
-            foregroundColor: isSelected ? Colors.white : Colors.black87,
-            elevation: isSelected ? 2 : 0,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _changePeriod(days),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? const Color(0xFF1DA1F2)
+                  : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+              border: isSelected
+                  ? null
+                  : Border.all(color: Colors.grey.shade300, width: 1.5),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF1DA1F2).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black87,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
           ),
-          child: Text(label),
         ),
       ),
     );
@@ -322,13 +367,38 @@ class _TinnitusChartScreenState extends State<TinnitusChartScreen> {
   /// 凡例を構築
   Widget _buildLegend() {
     return Container(
+      margin: const EdgeInsets.all(16.0),
       padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300, width: 1.5),
+      ),
+      child: Column(
         children: [
-          Container(width: 20, height: 3, color: const Color(0xFF1DA1F2)),
-          const SizedBox(width: 8),
-          const Text('耳鳴りレベル（朝→昼→夜の順）', style: TextStyle(fontSize: 14)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 24,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1DA1F2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                '耳鳴りレベル',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '朝 → 昼 → 夜 の順で表示',
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          ),
         ],
       ),
     );

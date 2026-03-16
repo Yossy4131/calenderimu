@@ -29,7 +29,7 @@ class CalendarGrid extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7,
-              childAspectRatio: 1.0,
+              childAspectRatio: 0.85,
               crossAxisSpacing: 4.0,
               mainAxisSpacing: 4.0,
             ),
@@ -87,57 +87,89 @@ class CalendarGrid extends StatelessWidget {
       textColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
     }
 
-    return InkWell(
-      onTap: () => onDayTapped(day.date),
-      borderRadius: BorderRadius.circular(8.0),
-      child: Stack(
-        children: [
-          // メインコンテナ
-          Container(
-            decoration: BoxDecoration(
-              color: _getCellBackgroundColor(day, theme),
-              borderRadius: BorderRadius.circular(20.0), // より丸みを帯びたデザイン
-              border: day.isToday && !day.isSelected
-                  ? Border.all(color: const Color(0xFF1DA1F2), width: 2.0)
-                  : null,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // 日付
-                Text(
-                  '${day.date.day}',
-                  style: TextStyle(
-                    color: day.isSelected ? Colors.white : textColor,
-                    fontWeight: day.isToday || day.isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(
+          color: theme.dividerColor.withOpacity(0.3),
+          width: 1.0,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => onDayTapped(day.date),
+          borderRadius: BorderRadius.circular(12.0),
+          child: Stack(
+            children: [
+              // メインコンテナ
+              Positioned.fill(
+                child: Container(
+                  padding: const EdgeInsets.all(2.0),
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 日付（今日は青い円、生理開始日はピンク色の円で囲む）
+                      Container(
+                        width: 26,
+                        height: 26,
+                        decoration: day.isToday
+                            ? BoxDecoration(
+                                color: const Color(0xFF1DA1F2),
+                                shape: BoxShape.circle,
+                              )
+                            : (day.periodStatus == PeriodStatus.start ||
+                                  day.periodStatus ==
+                                      PeriodStatus.startConfirmed)
+                            ? BoxDecoration(
+                                color: Colors.pink.shade400,
+                                shape: BoxShape.circle,
+                              )
+                            : null,
+                        child: Center(
+                          child: Text(
+                            '${day.date.day}',
+                            style: TextStyle(
+                              color:
+                                  (day.isToday ||
+                                      day.periodStatus == PeriodStatus.start ||
+                                      day.periodStatus ==
+                                          PeriodStatus.startConfirmed)
+                                  ? Colors.white
+                                  : textColor,
+                              fontSize: 15,
+                              fontWeight:
+                                  day.isToday ||
+                                      day.periodStatus == PeriodStatus.start ||
+                                      day.periodStatus ==
+                                          PeriodStatus.startConfirmed
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      // 耳鳴りデータのインジケーター
+                      if (day.tinnitusData?.hasAnyData ?? false)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 1.0),
+                          child: _buildTinnitusIndicator(day),
+                        ),
+                    ],
                   ),
                 ),
-                // 生理期間のインジケーター（開始日のみ表示）
-                if (day.periodStatus == PeriodStatus.start ||
-                    day.periodStatus == PeriodStatus.startConfirmed)
-                  const SizedBox(height: 2),
-                if (day.periodStatus == PeriodStatus.start ||
-                    day.periodStatus == PeriodStatus.startConfirmed)
-                  Icon(
-                    Icons.water_drop,
-                    size: 12,
-                    color: day.isSelected ? Colors.white : Colors.pink.shade400,
-                  ),
-                // 耳鳴りデータのインジケーター
-                if (day.tinnitusData?.hasAnyData ?? false)
-                  const SizedBox(height: 2),
-                if (day.tinnitusData?.hasAnyData ?? false)
-                  _buildTinnitusIndicator(day),
-              ],
-            ),
+              ),
+              // 生理期間の横棒
+              if (day.periodStatus != null &&
+                  day.periodStatus != PeriodStatus.start)
+                _buildPeriodBar(day),
+            ],
           ),
-          // 生理期間の横棒
-          if (day.periodStatus != null &&
-              day.periodStatus != PeriodStatus.start)
-            _buildPeriodBar(day),
-        ],
+        ),
       ),
     );
   }
@@ -152,21 +184,24 @@ class CalendarGrid extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (data.morningLevel != null) _buildLevelDot(data.morningLevel!),
-        if (data.afternoonLevel != null) _buildLevelDot(data.afternoonLevel!),
-        if (data.eveningLevel != null) _buildLevelDot(data.eveningLevel!),
+        if (data.morningLevel != null)
+          _buildLevelDot(data.morningLevel!, day.isSelected),
+        if (data.afternoonLevel != null)
+          _buildLevelDot(data.afternoonLevel!, day.isSelected),
+        if (data.eveningLevel != null)
+          _buildLevelDot(data.eveningLevel!, day.isSelected),
       ],
     );
   }
 
   /// レベルドットを構築
-  Widget _buildLevelDot(int level) {
+  Widget _buildLevelDot(int level, bool isOnSelectedDay) {
     return Container(
-      width: 4,
-      height: 4,
-      margin: const EdgeInsets.symmetric(horizontal: 1),
+      width: 5,
+      height: 5,
+      margin: const EdgeInsets.symmetric(horizontal: 1.5),
       decoration: BoxDecoration(
-        color: _getLevelColor(level),
+        color: isOnSelectedDay ? Colors.white : _getLevelColor(level),
         shape: BoxShape.circle,
       ),
     );
@@ -230,12 +265,7 @@ class CalendarGrid extends StatelessWidget {
 
   /// セルの背景色を取得
   Color _getCellBackgroundColor(CalendarDay day, ThemeData theme) {
-    if (day.isSelected) {
-      return const Color(0xFF1DA1F2); // Twitterブルー
-    }
-    if (day.isToday) {
-      return const Color(0xFF1DA1F2).withOpacity(0.08);
-    }
+    // 背景色は常に透明（今日と生理開始日は円で表現）
     return Colors.transparent;
   }
 

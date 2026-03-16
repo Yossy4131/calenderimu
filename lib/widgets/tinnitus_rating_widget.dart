@@ -47,34 +47,90 @@ class TinnitusRatingWidget extends StatelessWidget {
     final avg = tinnitusData?.averageLevel;
 
     return Card(
-      color: const Color(0xFF1DA1F2).withOpacity(0.1),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            const Icon(Icons.analytics, color: Color(0xFF1DA1F2)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '平均レベル',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF1DA1F2).withOpacity(0.1),
+              const Color(0xFF1DA1F2).withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF1DA1F2).withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.analytics,
+                  color: Color(0xFF1DA1F2),
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '平均耳鳴りレベル',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      avg != null ? avg.toStringAsFixed(1) : '-',
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1DA1F2),
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (avg != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    avg != null ? avg.toStringAsFixed(1) : '-',
+                  decoration: BoxDecoration(
+                    color: _getLevelColor(avg.round()),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    avg <= 3 ? '低' : (avg <= 6 ? '中' : '高'),
                     style: const TextStyle(
-                      fontSize: 24,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1DA1F2),
+                      fontSize: 14,
                     ),
                   ),
-                ],
-              ),
-            ),
-          ],
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -87,45 +143,79 @@ class TinnitusRatingWidget extends StatelessWidget {
     int? currentLevel,
     String timeOfDay,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: currentLevel != null
+              ? _getLevelColor(currentLevel).withOpacity(0.3)
+              : Colors.grey.shade200,
+          width: 2,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            if (currentLevel != null)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: currentLevel != null
+                        ? _getLevelColor(currentLevel).withOpacity(0.1)
+                        : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
                 ),
-                decoration: BoxDecoration(
-                  color: _getLevelColor(currentLevel),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '$currentLevel',
+                const SizedBox(width: 12),
+                Text(
+                  label,
                   style: const TextStyle(
-                    color: Colors.white,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
                   ),
                 ),
-              ),
+                const Spacer(),
+                if (currentLevel != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getLevelColor(currentLevel),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _getLevelColor(currentLevel).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      '$currentLevel',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            GaugeBarWidget(
+              currentLevel: currentLevel,
+              onLevelChanged: (level) => onLevelChanged(timeOfDay, level),
+            ),
           ],
         ),
-        const SizedBox(height: 16),
-        GaugeBarWidget(
-          currentLevel: currentLevel,
-          onLevelChanged: (level) => onLevelChanged(timeOfDay, level),
-        ),
-      ],
+      ),
     );
   }
 
