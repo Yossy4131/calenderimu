@@ -280,98 +280,153 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
       child: Scaffold(
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
+            : Stack(
+                children: [
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 64),
 
-                    // 服薬記録ウィジェット
-                    MedicationCheckWidget(
-                      medicationData: MedicationData(
-                        dateKey: MedicationData.dateKeyFromDateTime(
-                          widget.date,
+                        // 服薬記録ウィジェット
+                        MedicationCheckWidget(
+                          medicationData: MedicationData(
+                            dateKey: MedicationData.dateKeyFromDateTime(
+                              widget.date,
+                            ),
+                            morningTaken: _editingMorningTaken,
+                            afternoonTaken: _editingAfternoonTaken,
+                            eveningTaken: _editingEveningTaken,
+                          ),
+                          onTakenChanged: _updateTaken,
                         ),
-                        morningTaken: _editingMorningTaken,
-                        afternoonTaken: _editingAfternoonTaken,
-                        eveningTaken: _editingEveningTaken,
-                      ),
-                      onTakenChanged: _updateTaken,
-                    ),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                    // 耳鳴り評価ウィジェット
-                    TinnitusRatingWidget(
-                      tinnitusData: TinnitusData(
-                        dateKey: TinnitusData.dateKeyFromDateTime(widget.date),
-                        morningLevel: _editingMorningLevel,
-                        afternoonLevel: _editingAfternoonLevel,
-                        eveningLevel: _editingEveningLevel,
-                      ),
-                      onLevelChanged: _updateLevel,
-                    ),
+                        // 耳鳴り評価ウィジェット
+                        TinnitusRatingWidget(
+                          tinnitusData: TinnitusData(
+                            dateKey: TinnitusData.dateKeyFromDateTime(
+                              widget.date,
+                            ),
+                            morningLevel: _editingMorningLevel,
+                            afternoonLevel: _editingAfternoonLevel,
+                            eveningLevel: _editingEveningLevel,
+                          ),
+                          onLevelChanged: _updateLevel,
+                        ),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                    // 生理記録ウィジェット
-                    PeriodTrackingWidget(
-                      isPeriod: _editingIsPeriod,
-                      onStartPeriod: _startPeriod,
-                      onEndPeriod: _endPeriod,
-                    ),
+                        // 生理記録ウィジェット
+                        PeriodTrackingWidget(
+                          isPeriod: _editingIsPeriod,
+                          onStartPeriod: _startPeriod,
+                          onEndPeriod: _endPeriod,
+                        ),
 
-                    const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                    // 保存ボタン
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton.icon(
-                        onPressed: _saveAllData,
-                        icon: const Icon(Icons.check, size: 24),
-                        label: const Text(
-                          '保存して戻る',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        // 保存ボタン
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton.icon(
+                            onPressed: _saveAllData,
+                            icon: const Icon(Icons.check, size: 24),
+                            label: const Text(
+                              '保存して戻る',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1DA1F2),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 3,
+                              shadowColor: const Color(
+                                0xFF1DA1F2,
+                              ).withOpacity(0.4),
+                            ),
                           ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1DA1F2),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+
+                        const SizedBox(height: 16),
+
+                        // クリアボタン
+                        if ((_editingMorningLevel != null ||
+                                _editingAfternoonLevel != null ||
+                                _editingEveningLevel != null) ||
+                            (_editingMorningTaken ||
+                                _editingAfternoonTaken ||
+                                _editingEveningTaken) ||
+                            _editingIsPeriod)
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: _showClearConfirmation,
+                              icon: const Icon(Icons.clear_all),
+                              label: const Text('すべてクリア'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                            ),
                           ),
-                          elevation: 3,
-                          shadowColor: const Color(0xFF1DA1F2).withOpacity(0.4),
+                      ],
+                    ),
+                  ),
+
+                  // 戻るボタン
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: SafeArea(
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          elevation: 2,
                         ),
+                        onPressed: () async {
+                          if (_hasUnsavedChanges) {
+                            final shouldPop = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('未保存の変更があります'),
+                                content: const Text('変更を保存せずに戻りますか？'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('キャンセル'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.red,
+                                    ),
+                                    child: const Text('破棄'),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (shouldPop == true && context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          } else {
+                            Navigator.pop(context);
+                          }
+                        },
                       ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // クリアボタン
-                    if ((_editingMorningLevel != null ||
-                            _editingAfternoonLevel != null ||
-                            _editingEveningLevel != null) ||
-                        (_editingMorningTaken ||
-                            _editingAfternoonTaken ||
-                            _editingEveningTaken) ||
-                        _editingIsPeriod)
-                      Center(
-                        child: TextButton.icon(
-                          onPressed: _showClearConfirmation,
-                          icon: const Icon(Icons.clear_all),
-                          label: const Text('すべてクリア'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.red,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                  ),
+                ],
               ),
       ),
     );
