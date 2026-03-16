@@ -72,34 +72,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  /// Googleサインインを実行
-  Future<void> _handleGoogleSignIn() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final userCredential = await _authService.signInWithGoogle();
-      if (userCredential == null && mounted) {
-        CommonWidgets.showSnackBar(context, message: 'サインインがキャンセルされました');
-      }
-    } catch (e) {
-      if (mounted) {
-        CommonWidgets.showSnackBar(
-          context,
-          message: 'サインインエラー: $e',
-          isError: true,
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -332,60 +304,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-
-                    const SizedBox(height: 24),
-
-                    // 区切り線
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.white.withOpacity(0.5),
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'または',
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.white.withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Googleサインインボタン
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _isLoading ? null : _handleGoogleSignIn,
-                        icon: const Icon(Icons.login, color: Color(0xFF1DA1F2)),
-                        label: const Text(
-                          'Googleで登録',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1DA1F2),
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          elevation: 4,
-                        ),
-                      ),
-                    ),
 
                     const SizedBox(height: 32),
 

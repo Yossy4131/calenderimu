@@ -47,8 +47,16 @@ app.*.map.json
 # Firebase related
 **/google-services.json
 **/GoogleService-Info.plist
-.firebaserc
 firebase-debug.log
 firebase-debug.*.log
 .firebase/
-lib/firebase_options.dart
+
+# Environment variables (if used)
+.env
+.env.local
+.env.*.local
+
+# Secret keys and credentials
+**/*_secret.json
+**/*_credentials.json
+**/service-account*.json

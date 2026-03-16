@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ユーザー認証チェック
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // 自分のデータかチェック
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // ユーザーコレクション
+    match /users/{userId} {
+      // 読み取り：自分のデータのみ
+      allow read: if isOwner(userId);
+      // 作成・更新：自分のデータのみ
+      allow create, update: if isOwner(userId);
+      // 削除：自分のデータのみ
+      allow delete: if isOwner(userId);
+      
+      // 耳鳴りデータ（サブコレクション）
+      match /tinnitus_records/{recordId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // 服薬データ（サブコレクション）
+      match /medication_records/{recordId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // 生理記録データ（サブコレクション）
+      match /period_records/{recordId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // デフォルト：すべてのアクセスを拒否
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

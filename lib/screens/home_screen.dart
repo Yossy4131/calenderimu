@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'calendar_screen.dart';
 import 'tinnitus_chart_screen.dart';
 import '../services/data_cleanup_service.dart';
@@ -34,7 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       await _cleanupService.performCleanupIfNeeded();
     } catch (e) {
-      print('Data cleanup error: $e');
+      if (kDebugMode) {
+        print('Data cleanup error: $e');
+      }
       // エラーが発生してもアプリの動作には影響させない
     }
   }
