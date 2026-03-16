@@ -141,7 +141,7 @@ class _TinnitusChartScreenState extends State<TinnitusChartScreen> {
           const SizedBox(width: 8),
           _buildPeriodButton('30日', 30),
           const SizedBox(width: 8),
-          _buildPeriodButton('90日', 90),
+          _buildPeriodButton('60日', 60),
         ],
       ),
     );

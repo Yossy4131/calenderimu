@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
@@ -14,6 +16,18 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // Firebase App Checkの設定（開発中は無効化）
+    // 本番環境で有効にする場合は、Firebaseコンソールで適切に設定してください
+    if (!kDebugMode) {
+      await FirebaseAppCheck.instance.activate(
+        webProvider: ReCaptchaV3Provider(
+          '6LfOBMAqAAAAAIa2_kCKokTh6rXYe4KWVS6fhW9K',
+        ),
+        androidProvider: AndroidProvider.playIntegrity,
+        appleProvider: AppleProvider.deviceCheck,
+      );
+    }
 
     // Firestoreの設定
     FirebaseFirestore.instance.settings = const Settings(
