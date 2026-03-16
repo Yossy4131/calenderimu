@@ -54,6 +54,38 @@ class AuthService {
     }
   }
 
+  /// メールアドレスで新規登録
+  Future<UserCredential> signUpWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      return await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      print('Email sign-up error: $e');
+      rethrow;
+    }
+  }
+
+  /// メールアドレスでサインイン
+  Future<UserCredential> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      return await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      print('Email sign-in error: $e');
+      rethrow;
+    }
+  }
+
   /// 匿名サインイン（開発/テスト用）
   Future<UserCredential> signInAnonymously() async {
     try {

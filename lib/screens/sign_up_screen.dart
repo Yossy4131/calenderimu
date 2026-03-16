@@ -1,32 +1,34 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import 'sign_up_screen.dart';
 
-/// ログイン画面
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+/// 新規登録画面
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  /// メールアドレスでログインを実行
-  Future<void> _handleEmailSignIn() async {
+  /// メールアドレスで新規登録を実行
+  Future<void> _handleEmailSignUp() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -36,21 +38,23 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _authService.signInWithEmail(
+      await _authService.signUpWithEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+      if (mounted) {
+        // 登録成功 - AuthWrapperで自動的にHomeScreenに遷移する
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       if (mounted) {
-        String errorMessage = 'ログインに失敗しました';
-        if (e.toString().contains('user-not-found')) {
-          errorMessage = 'ユーザーが見つかりません';
-        } else if (e.toString().contains('wrong-password')) {
-          errorMessage = 'パスワードが正しくありません';
+        String errorMessage = '新規登録に失敗しました';
+        if (e.toString().contains('email-already-in-use')) {
+          errorMessage = 'このメールアドレスは既に使用されています';
         } else if (e.toString().contains('invalid-email')) {
           errorMessage = '有効なメールアドレスを入力してください';
-        } else if (e.toString().contains('invalid-credential')) {
-          errorMessage = 'メールアドレスまたはパスワードが正しくありません';
+        } else if (e.toString().contains('weak-password')) {
+          errorMessage = 'パスワードは6文字以上で入力してください';
         }
         ScaffoldMessenger.of(
           context,
@@ -74,7 +78,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final userCredential = await _authService.signInWithGoogle();
       if (userCredential == null && mounted) {
-        // ユーザーがキャンセルした場合
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('サインインがキャンセルされました')));
@@ -134,8 +137,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      '耳鳴り・服薬・生理を記録',
-                      style: TextStyle(fontSize: 16, color: Colors.white70),
+                      '新規登録',
+                      style: TextStyle(fontSize: 18, color: Colors.white70),
                     ),
                     const SizedBox(height: 40),
 
@@ -232,12 +235,73 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (value == null || value.isEmpty) {
                           return 'パスワードを入力してください';
                         }
+                        if (value.length < 6) {
+                          return 'パスワードは6文字以上で入力してください';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // パスワード確認入力
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      obscureText: _obscureConfirmPassword,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'パスワード（確認）',
+                        labelStyle: const TextStyle(color: Colors.white70),
+                        prefixIcon: const Icon(
+                          Icons.lock_outline,
+                          color: Colors.white70,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.white70,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
+                            });
+                          },
+                        ),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.2),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(
+                            color: Colors.white.withOpacity(0.5),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                            color: Colors.white,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'パスワードを再入力してください';
+                        }
+                        if (value != _passwordController.text) {
+                          return 'パスワードが一致しません';
+                        }
                         return null;
                       },
                     ),
                     const SizedBox(height: 32),
 
-                    // ログインボタン
+                    // 登録ボタン
                     if (_isLoading)
                       const CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -246,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _handleEmailSignIn,
+                          onPressed: _handleEmailSignUp,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -256,7 +320,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             elevation: 4,
                           ),
                           child: const Text(
-                            'ログイン',
+                            '新規登録',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -302,7 +366,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _isLoading ? null : _handleGoogleSignIn,
                         icon: const Icon(Icons.login, color: Color(0xFF1DA1F2)),
                         label: const Text(
-                          'Googleでログイン',
+                          'Googleで登録',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -322,17 +386,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 32),
 
-                    // 新規登録へのリンク
+                    // ログイン画面へのリンク
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const SignUpScreen(),
-                          ),
-                        );
+                        Navigator.of(context).pop();
                       },
                       child: const Text(
-                        'アカウントをお持ちでない方は新規登録',
+                        'すでにアカウントをお持ちの方はログイン',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,

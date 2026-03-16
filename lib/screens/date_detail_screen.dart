@@ -283,21 +283,6 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(formattedDate, style: const TextStyle(fontSize: 18)),
-              Text(
-                '$weekday曜日',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
-        ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
