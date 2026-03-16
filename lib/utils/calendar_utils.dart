@@ -1,4 +1,5 @@
 import '../models/calendar_day.dart';
+import '../models/tinnitus_data.dart';
 
 /// カレンダー関連のユーティリティ関数を提供するクラス
 class CalendarUtils {
@@ -7,12 +8,14 @@ class CalendarUtils {
   /// [year] 年
   /// [month] 月（1-12）
   /// [selectedDate] 選択されている日付（オプション）
+  /// [tinnitusDataMap] 耳鳴りデータのマップ（オプション）
   ///
   /// 返り値: カレンダーに表示する日付のリスト（前月末・当月・次月初を含む）
   static List<CalendarDay> generateCalendarDays({
     required int year,
     required int month,
     DateTime? selectedDate,
+    Map<String, TinnitusData>? tinnitusDataMap,
   }) {
     final List<CalendarDay> days = [];
     final firstDayOfMonth = DateTime(year, month, 1);
@@ -26,12 +29,14 @@ class CalendarUtils {
     final previousMonthLastDay = DateTime(year, month, 0);
     for (int i = firstWeekday - 1; i >= 0; i--) {
       final date = previousMonthLastDay.subtract(Duration(days: i));
+      final dateKey = TinnitusData.dateKeyFromDateTime(date);
       days.add(
         CalendarDay(
           date: date,
           isCurrentMonth: false,
           isToday: _isSameDay(date, today),
           isSelected: selectedDate != null && _isSameDay(date, selectedDate),
+          tinnitusData: tinnitusDataMap?[dateKey],
         ),
       );
     }
@@ -39,12 +44,14 @@ class CalendarUtils {
     // 当月の日付を追加
     for (int day = 1; day <= lastDayOfMonth.day; day++) {
       final date = DateTime(year, month, day);
+      final dateKey = TinnitusData.dateKeyFromDateTime(date);
       days.add(
         CalendarDay(
           date: date,
           isCurrentMonth: true,
           isToday: _isSameDay(date, today),
           isSelected: selectedDate != null && _isSameDay(date, selectedDate),
+          tinnitusData: tinnitusDataMap?[dateKey],
         ),
       );
     }
@@ -53,12 +60,14 @@ class CalendarUtils {
     final remainingDays = 42 - days.length;
     for (int day = 1; day <= remainingDays; day++) {
       final date = DateTime(year, month + 1, day);
+      final dateKey = TinnitusData.dateKeyFromDateTime(date);
       days.add(
         CalendarDay(
           date: date,
           isCurrentMonth: false,
           isToday: _isSameDay(date, today),
           isSelected: selectedDate != null && _isSameDay(date, selectedDate),
+          tinnitusData: tinnitusDataMap?[dateKey],
         ),
       );
     }

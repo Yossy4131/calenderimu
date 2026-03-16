@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../utils/calendar_utils.dart';
 import '../widgets/calendar_header.dart';
 import '../widgets/calendar_grid.dart';
+import '../services/tinnitus_service.dart';
+import '../models/tinnitus_data.dart';
+import 'date_detail_screen.dart';
 
 /// カレンダー画面
 class CalendarScreen extends StatefulWidget {
@@ -15,6 +18,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
   late int _currentYear;
   late int _currentMonth;
   DateTime? _selectedDate;
+  final TinnitusService _tinnitusService = TinnitusService();
+  Map<String, TinnitusData> _tinnitusDataMap = {};
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -22,6 +28,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final now = DateTime.now();
     _currentYear = now.year;
     _currentMonth = now.month;
+    _loadMonthData();
+  }
+
+  /// 月のデータを読み込む
+  Future<void> _loadMonthData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final data = await _tinnitusService.getTinnitusDataForMonth(
+      _currentYear,
+      _currentMonth,
+    );
+
+    setState(() {
+      _tinnitusDataMap = data;
+      _isLoading = false;
+    });
   }
 
   /// 前月に移動
@@ -34,6 +58,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _currentYear = previous.year;
       _currentMonth = previous.month;
     });
+    _loadMonthData();
   }
 
   /// 次月に移動
@@ -43,6 +68,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _currentYear = next.year;
       _currentMonth = next.month;
     });
+    _loadMonthData();
   }
 
   /// 今日の日付に移動
@@ -53,59 +79,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _currentMonth = now.month;
       _selectedDate = now;
     });
+    _loadMonthData();
   }
 
   /// 日付がタップされた時の処理
-  void _onDayTapped(DateTime date) {
+  void _onDayTapped(DateTime date) async {
     setState(() {
       _selectedDate = date;
     });
 
-    // 選択された日付の詳細を表示
-    _showDateDetails(date);
-  }
-
-  /// 選択された日付の詳細を表示
-  void _showDateDetails(DateTime date) {
-    final formattedDate = '${date.year}年${date.month}月${date.day}日';
-    final weekdayNames = ['月', '火', '水', '木', '金', '土', '日'];
-    final weekday = weekdayNames[date.weekday - 1];
-
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                formattedDate,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              Text(
-                '$weekday曜日',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 24.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('閉じる'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
+    // 日付詳細画面に遷移
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => DateDetailScreen(date: date)),
     );
+
+    // 戻ってきたらデータを再読み込み
+    _loadMonthData();
   }
 
   @override
@@ -115,6 +105,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       year: _currentYear,
       month: _currentMonth,
       selectedDate: _selectedDate,
+      tinnitusDataMap: _tinnitusDataMap,
     );
 
     return Scaffold(
@@ -131,6 +122,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
 
             const Divider(height: 1),
+
+            // ローディングインジケーター
+            if (_isLoading) const LinearProgressIndicator(minHeight: 2),
 
             // カレンダーグリッド
             Expanded(

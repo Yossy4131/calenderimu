@@ -1,3 +1,5 @@
+import 'tinnitus_data.dart';
+
 /// カレンダーの日付を表すモデルクラス
 class CalendarDay {
   /// 日付
@@ -12,11 +14,15 @@ class CalendarDay {
   /// 選択されているかどうか
   final bool isSelected;
 
+  /// 耳鳴りデータ
+  final TinnitusData? tinnitusData;
+
   const CalendarDay({
     required this.date,
     required this.isCurrentMonth,
     required this.isToday,
     this.isSelected = false,
+    this.tinnitusData,
   });
 
   /// 日付のコピーを作成（一部プロパティを変更可能）
@@ -25,12 +31,14 @@ class CalendarDay {
     bool? isCurrentMonth,
     bool? isToday,
     bool? isSelected,
+    TinnitusData? tinnitusData,
   }) {
     return CalendarDay(
       date: date ?? this.date,
       isCurrentMonth: isCurrentMonth ?? this.isCurrentMonth,
       isToday: isToday ?? this.isToday,
       isSelected: isSelected ?? this.isSelected,
+      tinnitusData: tinnitusData ?? this.tinnitusData,
     );
   }
 
