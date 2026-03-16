@@ -200,7 +200,7 @@ class CalendarGrid extends StatelessWidget {
       height: 5,
       margin: const EdgeInsets.symmetric(horizontal: 1.5),
       decoration: BoxDecoration(
-        color: isOnSelectedDay ? Colors.white : AppColors.getLevelColor(level),
+        color: AppColors.getLevelColor(level),
         shape: BoxShape.circle,
       ),
     );
