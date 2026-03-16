@@ -1,18 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
-import 'tinnitus_service.dart';
-import 'medication_service.dart';
-import 'period_service.dart';
 
 /// データクリーンアップサービス
 /// 2ヶ月以上前のデータを自動削除する
 class DataCleanupService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthService _authService = AuthService();
-  final TinnitusService _tinnitusService = TinnitusService();
-  final MedicationService _medicationService = MedicationService();
-  final PeriodService _periodService = PeriodService();
 
   static const String _lastCleanupKey = 'last_cleanup_date';
   static const int _dataRetentionMonths = 2;
@@ -138,7 +132,7 @@ class DataCleanupService {
       final batch = _firestore.batch();
 
       for (final doc in querySnapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         final startDate = data['startDate'] as String?;
         final endDate = data['endDate'] as String?;
 

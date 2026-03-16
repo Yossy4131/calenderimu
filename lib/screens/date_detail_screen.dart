@@ -247,11 +247,6 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate =
-        '${widget.date.year}年${widget.date.month}月${widget.date.day}日';
-    final weekdayNames = ['月', '火', '水', '木', '金', '土', '日'];
-    final weekday = weekdayNames[widget.date.weekday - 1];
-
     return PopScope(
       canPop: !_hasUnsavedChanges,
       onPopInvokedWithResult: (bool didPop, dynamic result) async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/tinnitus_service.dart';
 import '../models/tinnitus_data.dart';
+import '../constants/app_constants.dart';
 
 /// 耳鳴りレベルのグラフ表示画面
 class TinnitusChartScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class TinnitusChartScreen extends StatefulWidget {
 
 class _TinnitusChartScreenState extends State<TinnitusChartScreen> {
   final TinnitusService _tinnitusService = TinnitusService();
-  int _selectedPeriod = 7; // デフォルトは7日間
+  int _selectedPeriod = AppConstants.defaultChartPeriod;
   List<TinnitusData> _chartData = [];
   bool _isLoading = false;
 
@@ -132,17 +133,20 @@ class _TinnitusChartScreenState extends State<TinnitusChartScreen> {
   /// 期間選択ボタンを構築
   Widget _buildPeriodSelector() {
     return Container(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(AppConstants.paddingLarge),
       child: Row(
-        children: [
-          _buildPeriodButton('7日', 7),
-          const SizedBox(width: 8),
-          _buildPeriodButton('14日', 14),
-          const SizedBox(width: 8),
-          _buildPeriodButton('30日', 30),
-          const SizedBox(width: 8),
-          _buildPeriodButton('60日', 60),
-        ],
+        children: AppConstants.chartPeriodOptions.map((days) {
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: days == AppConstants.chartPeriodOptions.last
+                    ? 0
+                    : AppConstants.paddingSmall,
+              ),
+              child: _buildPeriodButton('${days}日', days),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../widgets/common_widgets.dart';
 
 /// 新規登録画面
 class SignUpScreen extends StatefulWidget {
@@ -56,9 +57,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         } else if (e.toString().contains('weak-password')) {
           errorMessage = 'パスワードは6文字以上で入力してください';
         }
-        ScaffoldMessenger.of(
+        CommonWidgets.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
+          message: errorMessage,
+          isError: true,
+        );
       }
     } finally {
       if (mounted) {
@@ -78,15 +81,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       final userCredential = await _authService.signInWithGoogle();
       if (userCredential == null && mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('サインインがキャンセルされました')));
+        CommonWidgets.showSnackBar(context, message: 'サインインがキャンセルされました');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        CommonWidgets.showSnackBar(
           context,
-        ).showSnackBar(SnackBar(content: Text('サインインエラー: $e')));
+          message: 'サインインエラー: $e',
+          isError: true,
+        );
       }
     } finally {
       if (mounted) {

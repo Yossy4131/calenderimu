@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'calendar_screen.dart';
 import 'tinnitus_chart_screen.dart';
-import '../services/auth_service.dart';
 import '../services/data_cleanup_service.dart';
+import '../constants/app_constants.dart';
 
 /// ホーム画面（ボトムナビゲーションバー付き）
 class HomeScreen extends StatefulWidget {
@@ -14,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  final AuthService _authService = AuthService();
   final DataCleanupService _cleanupService = DataCleanupService();
 
   // 画面リスト
@@ -40,40 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// サインアウト処理
-  Future<void> _handleSignOut() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('サインアウト'),
-        content: const Text('サインアウトしますか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('サインアウト'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true && mounted) {
-      try {
-        await _authService.signOut();
-        // AuthWrapperがStreamBuilderで自動的にログイン画面に遷移
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('サインアウトエラー: $e')));
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _currentIndex = index;
           });
         },
-        selectedItemColor: const Color(0xFF1DA1F2),
+        selectedItemColor: AppConstants.primaryColor,
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(

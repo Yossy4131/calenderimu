@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/calendar_day.dart';
 import '../utils/calendar_utils.dart';
+import '../constants/app_constants.dart';
 
 /// カレンダーのグリッド表示ウィジェット
 class CalendarGrid extends StatelessWidget {
@@ -21,17 +22,17 @@ class CalendarGrid extends StatelessWidget {
     return Column(
       children: [
         // 曜日ヘッダー
-        _buildWeekdayHeader(context),
+        _buildWeekdayHeader(),
 
         // 日付グリッド
         Expanded(
           child: GridView.builder(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(AppConstants.paddingSmall),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7,
-              childAspectRatio: 0.85,
-              crossAxisSpacing: 4.0,
-              mainAxisSpacing: 4.0,
+              childAspectRatio: AppConstants.calendarGridCrossAxisRatio,
+              crossAxisSpacing: AppConstants.calendarGridSpacing,
+              mainAxisSpacing: AppConstants.calendarGridSpacing,
             ),
             itemCount: days.length,
             itemBuilder: (context, index) {
@@ -44,11 +45,11 @@ class CalendarGrid extends StatelessWidget {
   }
 
   /// 曜日ヘッダーを構築
-  Widget _buildWeekdayHeader(BuildContext context) {
+  Widget _buildWeekdayHeader() {
     final weekdayNames = CalendarUtils.getWeekdayNames();
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
       child: Row(
         children: weekdayNames.map((name) {
           return Expanded(
@@ -57,7 +58,7 @@ class CalendarGrid extends StatelessWidget {
                 name,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: _getWeekdayColor(name),
+                  color: AppColors.getWeekdayColor(name),
                 ),
               ),
             ),
@@ -78,18 +79,16 @@ class CalendarGrid extends StatelessWidget {
     if (!day.isCurrentMonth) {
       textColor = Colors.grey.shade400;
     } else if (isWeekend) {
-      if (day.date.weekday == DateTime.sunday) {
-        textColor = Colors.red.shade700;
-      } else {
-        textColor = Colors.blue.shade700;
-      }
+      textColor = day.date.weekday == DateTime.sunday
+          ? Colors.red.shade700
+          : Colors.blue.shade700;
     } else {
       textColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
     }
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         border: Border.all(
           color: theme.dividerColor.withOpacity(0.3),
           width: 1.0,
@@ -99,7 +98,7 @@ class CalendarGrid extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => onDayTapped(day.date),
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
           child: Stack(
             children: [
               // メインコンテナ
@@ -114,11 +113,11 @@ class CalendarGrid extends StatelessWidget {
                     children: [
                       // 日付（今日は青い円、生理開始日はピンク色の円で囲む）
                       Container(
-                        width: 26,
-                        height: 26,
+                        width: AppConstants.calendarCellSize,
+                        height: AppConstants.calendarCellSize,
                         decoration: day.isToday
-                            ? BoxDecoration(
-                                color: const Color(0xFF1DA1F2),
+                            ? const BoxDecoration(
+                                color: AppConstants.primaryColor,
                                 shape: BoxShape.circle,
                               )
                             : (day.periodStatus == PeriodStatus.start ||
@@ -140,7 +139,7 @@ class CalendarGrid extends StatelessWidget {
                                           PeriodStatus.startConfirmed)
                                   ? Colors.white
                                   : textColor,
-                              fontSize: 15,
+                              fontSize: AppConstants.calendarDateFontSize,
                               fontWeight:
                                   day.isToday ||
                                       day.periodStatus == PeriodStatus.start ||
@@ -201,21 +200,10 @@ class CalendarGrid extends StatelessWidget {
       height: 5,
       margin: const EdgeInsets.symmetric(horizontal: 1.5),
       decoration: BoxDecoration(
-        color: isOnSelectedDay ? Colors.white : _getLevelColor(level),
+        color: isOnSelectedDay ? Colors.white : AppColors.getLevelColor(level),
         shape: BoxShape.circle,
       ),
     );
-  }
-
-  /// レベルに応じた色を取得
-  Color _getLevelColor(int level) {
-    if (level <= 3) {
-      return Colors.green;
-    } else if (level <= 6) {
-      return Colors.orange;
-    } else {
-      return Colors.red;
-    }
   }
 
   /// 生理期間の横棒を構築
@@ -261,22 +249,5 @@ class CalendarGrid extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// セルの背景色を取得
-  Color _getCellBackgroundColor(CalendarDay day, ThemeData theme) {
-    // 背景色は常に透明（今日と生理開始日は円で表現）
-    return Colors.transparent;
-  }
-
-  /// 曜日の色を取得
-  Color _getWeekdayColor(String weekdayName) {
-    if (weekdayName == '日') {
-      return Colors.red.shade700;
-    } else if (weekdayName == '土') {
-      return Colors.blue.shade700;
-    } else {
-      return Colors.black87;
-    }
   }
 }
