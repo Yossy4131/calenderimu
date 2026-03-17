@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import '../models/tinnitus_data.dart';
 import '../models/medication_data.dart';
+import '../models/notes_data.dart';
 import '../services/tinnitus_service.dart';
 import '../services/medication_service.dart';
 import '../services/period_service.dart';
+import '../services/notes_service.dart';
 import '../widgets/tinnitus_rating_widget.dart';
 import '../widgets/medication_check_widget.dart';
 import '../widgets/period_tracking_widget.dart';
+import '../widgets/notes_widget.dart';
 
 /// 日付詳細画面（耳鳴り評価入力画面）
 class DateDetailScreen extends StatefulWidget {
@@ -22,6 +25,7 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
   final TinnitusService _tinnitusService = TinnitusService();
   final MedicationService _medicationService = MedicationService();
   final PeriodService _periodService = PeriodService();
+  final NotesService _notesService = NotesService();
   bool _isLoading = true;
   bool _hasUnsavedChanges = false;
 
@@ -29,15 +33,25 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
   int? _editingMorningLevel;
   int? _editingAfternoonLevel;
   int? _editingEveningLevel;
+  String _editingNotes = '';
   bool _editingMorningTaken = false;
   bool _editingAfternoonTaken = false;
   bool _editingEveningTaken = false;
   bool _editingIsPeriod = false;
 
+  // テキストコントローラー
+  final TextEditingController _notesController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
   }
 
   /// データを読み込む
@@ -46,27 +60,46 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
       _isLoading = true;
     });
 
-    final tinnitusData = await _tinnitusService.getTinnitusData(widget.date);
-    final medicationData = await _medicationService.getMedicationData(
-      widget.date,
-    );
-    // 最新の生理期間が進行中かどうかを取得
-    final ongoingPeriod = await _periodService.getOngoingPeriod();
+    try {
+      final tinnitusData = await _tinnitusService.getTinnitusData(widget.date);
+      final medicationData = await _medicationService.getMedicationData(
+        widget.date,
+      );
+      final notesData = await _notesService.getNotesData(widget.date);
+      // 最新の生理期間が進行中かどうかを取得
+      final ongoingPeriod = await _periodService.getOngoingPeriod();
 
-    setState(() {
-      // ローカル編集用データを初期化
-      _editingMorningLevel = tinnitusData?.morningLevel;
-      _editingAfternoonLevel = tinnitusData?.afternoonLevel;
-      _editingEveningLevel = tinnitusData?.eveningLevel;
-      _editingMorningTaken = medicationData?.morningTaken ?? false;
-      _editingAfternoonTaken = medicationData?.afternoonTaken ?? false;
-      _editingEveningTaken = medicationData?.eveningTaken ?? false;
-      // 進行中の期間があるかどうか（最新ドキュメントのendDateがnull）
-      _editingIsPeriod = ongoingPeriod != null;
+      setState(() {
+        // ローカル編集用データを初期化
+        _editingMorningLevel = tinnitusData?.morningLevel;
+        _editingAfternoonLevel = tinnitusData?.afternoonLevel;
+        _editingEveningLevel = tinnitusData?.eveningLevel;
+        _editingNotes = notesData?.notes ?? '';
+        _notesController.text = _editingNotes;
+        _editingMorningTaken = medicationData?.morningTaken ?? false;
+        _editingAfternoonTaken = medicationData?.afternoonTaken ?? false;
+        _editingEveningTaken = medicationData?.eveningTaken ?? false;
+        // 進行中の期間があるかどうか（最新ドキュメントのendDateがnull）
+        _editingIsPeriod = ongoingPeriod != null;
 
-      _isLoading = false;
-      _hasUnsavedChanges = false;
-    });
+        _isLoading = false;
+        _hasUnsavedChanges = false;
+      });
+    } catch (e) {
+      print('Load data error: $e');
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('データの読み込みに失敗しました: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   /// レベルを更新（ローカル状態のみ）
@@ -180,10 +213,17 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
         eveningTaken: _editingEveningTaken,
       );
 
+      // 備考データを保存
+      final notesData = NotesData(
+        dateKey: NotesData.dateKeyFromDateTime(widget.date),
+        notes: _editingNotes.isEmpty ? null : _editingNotes,
+      );
+
       // 並列で保存（生理記録は期間として別管理されているため含めない）
       await Future.wait([
         _tinnitusService.saveTinnitusData(tinnitusData),
         _medicationService.saveMedicationData(medicationData),
+        _notesService.saveNotesData(notesData),
       ]);
 
       setState(() {
@@ -326,6 +366,23 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
                           onEndPeriod: _endPeriod,
                         ),
 
+                        const SizedBox(height: 24),
+
+                        // 備考欄ウィジェット
+                        NotesWidget(
+                          notesData: NotesData(
+                            dateKey: NotesData.dateKeyFromDateTime(widget.date),
+                            notes: _editingNotes,
+                          ),
+                          controller: _notesController,
+                          onNotesChanged: (value) {
+                            setState(() {
+                              _editingNotes = value;
+                              _hasUnsavedChanges = true;
+                            });
+                          },
+                        ),
+
                         const SizedBox(height: 32),
 
                         // 保存ボタン
@@ -361,7 +418,8 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
                         // クリアボタン
                         if ((_editingMorningLevel != null ||
                                 _editingAfternoonLevel != null ||
-                                _editingEveningLevel != null) ||
+                                _editingEveningLevel != null ||
+                                _editingNotes.isNotEmpty) ||
                             (_editingMorningTaken ||
                                 _editingAfternoonTaken ||
                                 _editingEveningTaken) ||
@@ -440,7 +498,7 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
         return AlertDialog(
           title: const Text('確認'),
           content: const Text(
-            'この日のすべての記録を削除しますか？\n（耳鳴り記録と服薬記録が削除されます）\n\n※ 生理記録は期間として管理されているため削除されません',
+            'この日のすべての記録を削除しますか？\n（耳鳴り記録、備考、服薬記録が削除されます）\n\n※ 生理記録は期間として管理されているため削除されません',
           ),
           actions: [
             TextButton(
@@ -459,10 +517,11 @@ class _DateDetailScreenState extends State<DateDetailScreen> {
 
     if (confirmed == true) {
       try {
-        // 耳鳴りデータと薬の服用データを削除（生理記録は期間管理のため含めない）
+        // 耳鳴りデータ、備考、薬の服用データを削除（生理記録は期間管理のため含めない）
         await Future.wait([
           _tinnitusService.deleteTinnitusData(widget.date),
           _medicationService.deleteMedicationData(widget.date),
+          _notesService.deleteNotesData(widget.date),
         ]);
 
         if (mounted) {

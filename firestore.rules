@@ -36,6 +36,11 @@ service cloud.firestore {
       match /period_records/{recordId} {
         allow read, write: if isOwner(userId);
       }
+      
+      // 備考データ（サブコレクション）
+      match /notes/{recordId} {
+        allow read, write: if isOwner(userId);
+      }
     }
     
     // デフォルト：すべてのアクセスを拒否

@@ -77,6 +77,7 @@ class DataCleanupService {
     await Future.wait([
       _deleteOldDocuments('tinnitus_records', cutoffDateKey),
       _deleteOldDocuments('medication_records', cutoffDateKey),
+      _deleteOldDocuments('notes', cutoffDateKey),
       _deleteOldPeriodDocuments(cutoffDateKey),
     ]);
   }
@@ -171,6 +172,7 @@ class DataCleanupService {
       final collections = [
         'tinnitus_records',
         'medication_records',
+        'notes',
         'period_records',
       ];
 
