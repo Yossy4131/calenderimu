@@ -26,11 +26,20 @@
         ]
       },
       {
-        "source": "**/*.@(jpg|jpeg|gif|png|svg|webp|js|css|woff|woff2)",
+        "source": "**/*.@(jpg|jpeg|gif|png|svg|webp|js|mjs|wasm|css|woff|woff2)",
         "headers": [
           {
             "key": "Cache-Control",
             "value": "max-age=31536000"
+          }
+        ]
+      },
+      {
+        "source": "**/flutter_service_worker.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
           }
         ]
       }

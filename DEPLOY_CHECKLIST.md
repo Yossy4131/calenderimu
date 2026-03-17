@@ -44,6 +44,7 @@
   ```bash
   flutter build web --release
   ```
+  > `web/index.html`にCanvasKitレンダラー設定が含まれていることを確認
 
 - [ ] Android版ビルドが成功する（該当する場合）
   ```bash

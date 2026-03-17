@@ -199,6 +199,8 @@ lib/
 flutter build web --release
 ```
 
+> **注**: グラフ表示のために、`web/index.html`にCanvasKitレンダラーを強制する設定が含まれています。
+
 ビルド成果物は`build/web/`に出力されます。
 
 ### Android版ビルド
@@ -223,12 +225,14 @@ flutter build ios --release
 # firebase.jsonの設定を確認
 firebase init hosting
 
-# ビルド
+# Web版ビルド
 flutter build web --release
 
 # デプロイ
 firebase deploy --only hosting
 ```
+
+> **重要**: デプロイ後は必ずブラウザのキャッシュをクリアしてください（Ctrl + Shift + R）。
 
 ## トラブルシューティング
 
